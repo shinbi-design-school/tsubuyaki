@@ -84,6 +84,20 @@ public class UserDAO {
 		statement.close();
 	}
 
+	private User createUser(ResultSet resultSet) throws SQLException {
+		User user = new User();
+
+		user.setId(resultSet.getInt("id"));
+		user.setName(resultSet.getString("name"));
+		user.setEmail(resultSet.getString("email"));
+		user.setPassword(resultSet.getString("password"));
+		user.setAdmin(resultSet.getBoolean("is_admin"));
+		user.setCreatedAt(resultSet.getTimestamp("created_at"));
+		user.setUpdatedAt(resultSet.getTimestamp("updated_at"));
+
+		return user;
+	}
+
 	public List<User> findAll() throws SQLException {
 		List<User> list = new ArrayList<User>();
 
@@ -91,14 +105,7 @@ public class UserDAO {
 		Statement statement = this.connection.createStatement();
 		ResultSet resultSet = statement.executeQuery(sql);
 		while (resultSet.next()) {
-			User user = new User();
-			user.setId(resultSet.getInt("id"));
-			user.setName(resultSet.getString("name"));
-			user.setEmail(resultSet.getString("email"));
-			user.setPassword(resultSet.getString("password"));
-			user.setAdmin(resultSet.getBoolean("is_admin"));
-			user.setCreatedAt(resultSet.getTimestamp("created_at"));
-			user.setUpdatedAt(resultSet.getTimestamp("updated_at"));
+			User user = createUser(resultSet);
 			list.add(user);
 		}
 		resultSet.close();
@@ -106,4 +113,53 @@ public class UserDAO {
 
 		return list;
 	}
+
+	public User find(int id) throws SQLException {
+		User user = null;
+
+		String sql = "SELECT * FROM users WHERE id = ?";
+		PreparedStatement statement = this.connection.prepareStatement(sql);
+		statement.setInt(1, id);
+		ResultSet resultSet = statement.executeQuery();
+		if (resultSet.next()) {
+			user = createUser(resultSet);
+		}
+		resultSet.close();
+		statement.close();
+
+		return user;
+	}
+
+	public User findByEmail(String email) throws SQLException {
+		User user = null;
+
+		String sql = "SELECT * FROM users WHERE email = ?";
+		PreparedStatement statement = this.connection.prepareStatement(sql);
+		statement.setString(1, email);
+		ResultSet resultSet = statement.executeQuery();
+		if (resultSet.next()) {
+			user = createUser(resultSet);
+		}
+		resultSet.close();
+		statement.close();
+
+		return user;
+	}
+
+	public int count() throws SQLException {
+		int count = 0;
+
+		String sql = "SELECT COUNT(*) AS count FROM users";
+		Statement statement = this.connection.createStatement();
+		ResultSet resultSet = statement.executeQuery(sql);
+		if (resultSet.next()) {
+			count = resultSet.getInt("count");
+		}
+
+		resultSet.close();
+		statement.close();
+
+		return count;
+	}
+
 }

@@ -52,7 +52,7 @@ class MessageTest {
 			dao.add(message.getUserId(), message.getText());
 		}
 		messages = dao.findAll();
-		if (!same(objects, messages)) {
+		if (!isSame(objects, messages)) {
 			fail("登録に失敗しました。");
 		}
 		objects = messages;
@@ -62,7 +62,7 @@ class MessageTest {
 		message.setText("レニ カナコ シオリ ササキアヤカ");
 		dao.update(message);
 		messages = dao.findAll();
-		if (!same(objects, messages)) {
+		if (!isSame(objects, messages)) {
 			fail("更新に失敗しました。");
 		}
 
@@ -71,14 +71,14 @@ class MessageTest {
 		dao.delete(message.getId());
 		objects.remove(3);
 		messages = dao.findAll();
-		if (!same(objects, messages)) {
+		if (!isSame(objects, messages)) {
 			fail("削除に失敗しました。");
 		}
 
 		connection.close();
 	}
 
-	public boolean same(List<Message> objects, List<Message> messages) {
+	public boolean isSame(List<Message> objects, List<Message> messages) {
 		if (objects.size() != messages.size()) {
 			return false;
 		}
