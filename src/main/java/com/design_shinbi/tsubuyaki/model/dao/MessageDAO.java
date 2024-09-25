@@ -92,7 +92,7 @@ public class MessageDAO {
 	public Message find(int id) throws SQLException {
 		Message message = null;
 
-		String sql = "SELECT * FROM messages WHERE user_id = ?";
+		String sql = "SELECT * FROM messages WHERE id = ?";
 		PreparedStatement statement = this.connection.prepareStatement(sql);
 		statement.setInt(1, id);
 		ResultSet resultSet = statement.executeQuery();
