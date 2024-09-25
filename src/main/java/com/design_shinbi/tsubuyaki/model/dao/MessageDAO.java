@@ -89,20 +89,19 @@ public class MessageDAO {
 		return list;
 	}
 
-	public List<Message> find(int id) throws SQLException {
-		List<Message> list = new ArrayList<Message>();
+	public Message find(int id) throws SQLException {
+		Message message = null;
 
 		String sql = "SELECT * FROM messages WHERE user_id = ?";
 		PreparedStatement statement = this.connection.prepareStatement(sql);
 		statement.setInt(1, id);
 		ResultSet resultSet = statement.executeQuery();
-		while (resultSet.next()) {
-			Message message = createMessage(resultSet);
-			list.add(message);
+		if (resultSet.next()) {
+			message = createMessage(resultSet);
 		}
 		resultSet.close();
 		statement.close();
 
-		return list;
+		return message;
 	}
 }
