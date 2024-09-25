@@ -1,15 +1,21 @@
 package com.design_shinbi.tsubuyaki.model.dao;
 
+import java.security.NoSuchAlgorithmException;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.design_shinbi.tsubuyaki.model.PostInfo;
+import com.design_shinbi.tsubuyaki.model.entity.Image;
 import com.design_shinbi.tsubuyaki.model.entity.Message;
+import com.design_shinbi.tsubuyaki.model.entity.User;
 
 public class MessageDAO {
 	private Connection connection;
@@ -36,21 +42,21 @@ public class MessageDAO {
 	}
 
 	public void update(Message message) throws SQLException {
-        Timestamp now = new Timestamp(System.currentTimeMillis());
-        
-        String sql = "UPDATE messages SET user_id = ?, text = ?, "
-        		+ "updated_at = ? WHERE id = ?";
-        
-        PreparedStatement statement = this.connection.prepareStatement(sql);
-        
-        statement.setInt(1, message.getUserId());
-        statement.setString(2, message.getText());
-        statement.setTimestamp(3, now);
-        statement.setInt(4, message.getId());
-        
-        statement.executeUpdate();
-        statement.close();
-    }
+		Timestamp now = new Timestamp(System.currentTimeMillis());
+
+		String sql = "UPDATE messages SET user_id = ?, text = ?, "
+				+ "updated_at = ? WHERE id = ?";
+
+		PreparedStatement statement = this.connection.prepareStatement(sql);
+
+		statement.setInt(1, message.getUserId());
+		statement.setString(2, message.getText());
+		statement.setTimestamp(3, now);
+		statement.setInt(4, message.getId());
+
+		statement.executeUpdate();
+		statement.close();
+	}
 
 	public void delete(int id) throws SQLException {
 		String sql = "DELETE FROM messages WHERE id = ?";
@@ -92,7 +98,7 @@ public class MessageDAO {
 	public Message find(int id) throws SQLException {
 		Message message = null;
 
-		String sql = "SELECT * FROM messages WHERE user_id = ?";
+		String sql = "SELECT * FROM messages WHERE id = ?";
 		PreparedStatement statement = this.connection.prepareStatement(sql);
 		statement.setInt(1, id);
 		ResultSet resultSet = statement.executeQuery();
@@ -104,4 +110,87 @@ public class MessageDAO {
 
 		return message;
 	}
+
+	public int getMaxId() throws SQLException {
+		String sql = "SELECT MAX(id) FROM messages";
+		Statement statement = this.connection.createStatement();
+		ResultSet resultSet = statement.executeQuery(sql);
+		int id = 0;
+		if (resultSet.next()) {
+			id = resultSet.getInt(1);
+		}
+		resultSet.close();
+		statement.close();
+
+		return id;
+	}
+
+	public void setImage(int id, Image image) throws SQLException {
+		String sql = "UPDATE messages SET image = ?, image_file_name = ? WHERE id = ?";
+		PreparedStatement statement = this.connection.prepareStatement(sql);
+
+		statement.setBlob(1, image.getStream());
+		statement.setString(2, image.getFileName());
+		statement.setInt(3, id);
+
+		statement.executeUpdate();
+		statement.close();
+	}
+
+	public void deleteImage(int id) throws SQLException {
+		String sql = "UPDATE messages SET image = ?, image_file_name = ? WHERE id = ?";
+		PreparedStatement statement = this.connection.prepareStatement(sql);
+
+		statement.setNull(1, Types.BLOB);
+		statement.setNull(2, Types.VARCHAR);
+		statement.setInt(3, id);
+
+		statement.executeUpdate();
+		statement.close();
+	}
+
+	public Image getImage(int id) throws SQLException {
+		String sql = "SELECT image, image_file_name FROM messages WHERE id = ?";
+		PreparedStatement statement = this.connection.prepareStatement(sql);
+
+		statement.setInt(1, id);
+
+		Image image = null;
+		ResultSet resultSet = statement.executeQuery();
+		if (resultSet.next()) {
+			String fileName = resultSet.getString("image_file_name");
+			Blob blob = resultSet.getBlob("image");
+
+			if (blob != null) {
+				image = new Image(fileName, blob.getBinaryStream());
+			}
+		}
+
+		resultSet.close();
+		statement.close();
+
+		return image;
+	}
+
+	public List<PostInfo> getPosts()
+			throws SQLException, NoSuchAlgorithmException {
+		UserDAO userDao = new UserDAO(this.connection);
+		List<Message> messages = this.findAll();
+
+		List<PostInfo> list = new ArrayList<PostInfo>();
+
+		for (Message message : messages) {
+			User user = userDao.find(message.getUserId());
+			Image image = this.getImage(message.getId());
+
+			PostInfo post = new PostInfo(user, message);
+			if (image != null) {
+				post.setImage(image);
+			}
+			list.add(post);
+		}
+
+		return list;
+	}
+
 }

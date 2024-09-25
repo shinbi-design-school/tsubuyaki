@@ -1,6 +1,7 @@
 package com.design_shinbi.tsubuyaki.servlet;
 
 import java.sql.Connection;
+import java.util.List;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -11,6 +12,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.design_shinbi.tsubuyaki.model.Const;
+import com.design_shinbi.tsubuyaki.model.PostInfo;
+import com.design_shinbi.tsubuyaki.model.dao.MessageDAO;
 import com.design_shinbi.tsubuyaki.model.dao.UserDAO;
 import com.design_shinbi.tsubuyaki.model.entity.User;
 import com.design_shinbi.tsubuyaki.util.DbUtil;
@@ -52,7 +55,13 @@ public class LoginServlet extends HttpServlet {
 			} else {
 				HttpSession session = request.getSession();
 				session.setAttribute(Const.LOGIN_USER_KEY, user);
-				jsp = "/WEB-INF/jsp/loginTest.jsp";
+
+				MessageDAO dao = new MessageDAO(connection);
+				List<PostInfo> posts = dao.getPosts();
+
+				request.setAttribute("posts", posts);
+
+				jsp = "/WEB-INF/jsp/top.jsp";
 			}
 
 			RequestDispatcher dispatcher = request.getRequestDispatcher(jsp);
