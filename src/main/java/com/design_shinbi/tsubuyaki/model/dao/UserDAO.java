@@ -12,13 +12,26 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.design_shinbi.tsubuyaki.model.Const;
 import com.design_shinbi.tsubuyaki.model.entity.User;
 
 public class UserDAO {
 	protected Connection connection;
 
-	public UserDAO(Connection connection) {
+	public UserDAO(Connection connection)
+			throws NoSuchAlgorithmException, SQLException {
 		this.connection = connection;
+		this.init();
+	}
+
+	private void init() throws SQLException, NoSuchAlgorithmException {
+		if (this.count() == 0) {
+			this.add(
+					Const.DEFAULT_USER_NAME,
+					Const.DEFAULT_USER_EMAIL,
+					Const.DEFAULT_USER_PASSWORD,
+					true);
+		}
 	}
 
 	public static String createHash(String password) throws NoSuchAlgorithmException {
@@ -161,5 +174,18 @@ public class UserDAO {
 
 		return count;
 	}
-
+	
+    public User login(String email, String password) 
+            throws SQLException, NoSuchAlgorithmException{
+        User user = this.findByEmail(email);
+        
+        if (user != null) {
+            String hash = createHash(password);
+            if (!user.getPassword().equals(hash)) {
+                user = null;
+            }
+        }
+        return user;
+    }
 }
+

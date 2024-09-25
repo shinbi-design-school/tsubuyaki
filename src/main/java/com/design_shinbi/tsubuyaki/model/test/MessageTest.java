@@ -2,6 +2,7 @@ package com.design_shinbi.tsubuyaki.model.test;
 
 import static org.junit.Assert.*;
 
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import com.design_shinbi.tsubuyaki.util.DbUtil;
 class MessageTest {
 
 	@Test
-	void test() throws ClassNotFoundException, SQLException {
+	void test() throws ClassNotFoundException, SQLException, NoSuchAlgorithmException {
 		Connection connection = DbUtil.connect(true);
 		UserDAO userDao = new UserDAO(connection);
 		MessageDAO dao = new MessageDAO(connection);
