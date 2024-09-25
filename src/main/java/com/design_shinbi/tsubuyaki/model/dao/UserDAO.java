@@ -174,18 +174,34 @@ public class UserDAO {
 
 		return count;
 	}
-	
-    public User login(String email, String password) 
-            throws SQLException, NoSuchAlgorithmException{
-        User user = this.findByEmail(email);
-        
-        if (user != null) {
-            String hash = createHash(password);
-            if (!user.getPassword().equals(hash)) {
-                user = null;
-            }
-        }
-        return user;
-    }
-}
 
+	public User login(String email, String password)
+			throws SQLException, NoSuchAlgorithmException {
+		User user = this.findByEmail(email);
+
+		if (user != null) {
+			String hash = createHash(password);
+			if (!user.getPassword().equals(hash)) {
+				user = null;
+			}
+		}
+		return user;
+	}
+
+	public void updatePassword(int id, String password)
+			throws SQLException, NoSuchAlgorithmException {
+		Timestamp now = new Timestamp(System.currentTimeMillis());
+		String hash = UserDAO.createHash(password);
+
+		String sql = "UPDATE users SET password = ?, updated_at = ? WHERE id = ?";
+
+		PreparedStatement statement = this.connection.prepareStatement(sql);
+		statement.setString(1, hash);
+		statement.setTimestamp(2, now);
+		statement.setInt(3, id);
+
+		statement.executeUpdate();
+		statement.close();
+	}
+
+}

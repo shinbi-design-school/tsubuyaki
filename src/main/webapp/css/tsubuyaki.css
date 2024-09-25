@@ -95,3 +95,32 @@ footer {
 	color: red;
 	font-weight: bold;
 }
+
+.icon {
+	font-size: 20px;
+	color: navy;
+}
+
+#users {
+	margin: 0 auto;
+	border: navy 1px solid;
+	border-collapse: collapse;
+}
+
+#users tr:nth-child(odd) {
+	background-color: #f0f0ff;
+}
+
+#users tr:nth-child(even) {
+	background-color: white;
+}
+
+#users th,
+#users td {
+	padding: 5px 10px;
+}
+
+#users th {
+	background-color: navy;
+	color: white;
+}
